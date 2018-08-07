@@ -131,12 +131,19 @@ contract MixinTransactions is
         // ));
 
         assembly {
+            // Load free memory pointer
             let memPtr := mload(64)
-            mstore(memPtr, schemaHash)
-            mstore(add(memPtr, 32), salt)
-            mstore(add(memPtr, 64), and(signerAddress, 0xffffffffffffffffffffffffffffffffffffffff))
-            mstore(add(memPtr, 96), dataHash)
+
+            mstore(memPtr, schemaHash)                                                               // hash of schema
+            mstore(add(memPtr, 32), salt)                                                            // salt
+            mstore(add(memPtr, 64), and(signerAddress, 0xffffffffffffffffffffffffffffffffffffffff))  // signerAddress
+            mstore(add(memPtr, 96), dataHash)                                                        // hash of data
+
+            // Compute hash
             result := keccak256(memPtr, 128)
+
+            // Increment free memory pointer
+            mstore(64, add(memPtr, 128))
         }
 
         return result;
